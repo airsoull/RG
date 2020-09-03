@@ -7,15 +7,14 @@ from base.models import BaseModel
 
 
 class Scraper(BaseModel):
-    currency = models.ForeignKey(
+    currency = models.OneToOneField(
         'api.Currency',
         verbose_name=_('currency'),
-        related_name='scrappers',
+        related_name='scrapper',
         on_delete=models.CASCADE,
     )
     frequency = models.PositiveIntegerField(
         _('frequency'),
-        default=60,
     )
 
     class Meta:

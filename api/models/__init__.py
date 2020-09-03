@@ -1,6 +1,6 @@
 from .currency import Currency
 from .price import Price
-from .scrapper import Scraper
+from .scraper import Scraper
 
 __all__ = (
     'Currency',

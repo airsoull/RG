@@ -40,6 +40,7 @@ INSTALLED_APPS = [
 
     # internal apps
     'api.apps.ApiConfig',
+    'webscraper',
 ]
 
 MIDDLEWARE = [

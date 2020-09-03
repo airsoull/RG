@@ -22,7 +22,7 @@ from api.views import ScraperAPI
 from webscraper.views import HomeView
 
 urlpatterns = [
-      path('', HomeView.as_view(), name='home'),
-      path('api/scrapers/', ScraperAPI.as_view(), name='scrapers'),
-      path('admin/', admin.site.urls),
+    path('', HomeView.as_view(), name='home'),
+    path('api/scrapers/', ScraperAPI.as_view(), name='scrapers'),
+    path('admin/', admin.site.urls),
 ] + static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
