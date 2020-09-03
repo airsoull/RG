@@ -40,7 +40,13 @@ class ScraperAPI(View):
             return self.get_bad_request(e)
 
     def delete(self, *args, **kwargs):
-        pass
+        try:
+            data = self.get_data()
+            return JsonResponse(
+                Currency.delete_currency(data=data)
+            )
+        except Exception as e:
+            return self.get_bad_request(e)
 
     def get_data(self):
         return json.loads(self.request.body)
