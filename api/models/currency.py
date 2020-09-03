@@ -6,6 +6,8 @@ from django.utils.translation import ugettext_lazy as _
 from base.models import BaseModel
 from base.utils import compare_keys
 from base.utils import valid_if_is_float
+from base.utils import get_obj_by_pk
+from base.utils import default_json_message
 
 # managers
 from api.managers import CurrencyQueryset
@@ -65,7 +67,6 @@ class Currency(BaseModel):
                 cls.objects.get(name=data['currency'])
                 .get_currency_retrieve_serializer()
             )
-
         try:
             currency = cls.create.create_currency_from_coinmarket(data)
         except Exception as e:
@@ -82,14 +83,26 @@ class Currency(BaseModel):
         compare_keys(data, valid_keys)
         valid_if_is_float(data['frequency'])
 
-        try:
-            currency = cls.objects.get(pk=data['id'])
-        except cls.DoesNotExist:
-            raise cls.DoesNotExist('Currency doesn\'t exists.')
-
+        currency = get_obj_by_pk(cls, data['id'], 'Currency doesn\'t exists.')
         currency.scrapper.update_frequency(data['frequency'])
 
-        return {'msg': f'Frequency of "{currency.name}" updated to {currency.frequency}'}
+        return default_json_message(
+            f'Frequency of "{currency.name}" updated to {currency.frequency}'
+        )
+
+    @classmethod
+    def delete_currency(cls, data):
+        valid_keys = (
+            'id',
+        )
+        compare_keys(data, valid_keys)
+
+        currency = get_obj_by_pk(cls, data['id'], 'Currency doesn\'t exists.')
+        currency.delete()
+
+        return default_json_message(
+            f'Currency "{currency.name}" was deleted.'
+        )
 
     def get_currency_retrieve_serializer(self) -> dict:
         return {

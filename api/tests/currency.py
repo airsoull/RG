@@ -127,3 +127,39 @@ class CurrencyTestCase(TestCase):
 
         with self.assertRaises(Currency.DoesNotExist):
             Currency.update_frequency(data)
+
+    def test_delete_currency(self):
+        currency = Currency.objects.create(name='Bitcoin')
+
+        data = {
+            'id': currency.pk,
+        }
+
+        Currency.delete_currency(data)
+        self.assertEqual(Currency.objects.count(), 0)
+
+    def test_delete_currency_invalid_data(self):
+        self.assertEqual(
+            Currency.objects.count(),
+            0
+        )
+
+        data = {
+            'invalid-key': 1,
+        }
+
+        with self.assertRaises(ValidationError):
+            Currency.delete_currency(data)
+
+    def test_delete_currency_invalid_id(self):
+        self.assertEqual(
+            Currency.objects.count(),
+            0
+        )
+
+        data = {
+            'id': 1,
+        }
+
+        with self.assertRaises(Currency.DoesNotExist):
+            Currency.delete_currency(data)

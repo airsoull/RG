@@ -15,3 +15,14 @@ def valid_if_is_float(data):
         float(data)
     except ValueError:
         raise ValueError('Error with data')
+
+
+def get_obj_by_pk(cls, pk, custom_error_message: str):
+    try:
+        return cls.objects.get(pk=pk)
+    except cls.DoesNotExist:
+        raise cls.DoesNotExist(custom_error_message)
+
+
+def default_json_message(message):
+    return {'msg': message}
