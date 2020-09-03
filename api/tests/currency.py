@@ -7,6 +7,7 @@ from requests.exceptions import HTTPError
 
 # models
 from api.models import Currency
+from api.models import Scraper
 
 
 class CurrencyTestCase(TestCase):
@@ -84,3 +85,45 @@ class CurrencyTestCase(TestCase):
             Currency.objects.count(),
             0
         )
+
+    def test_update_frequency(self):
+        currency = Currency.objects.create(name='Bitcoin')
+        Scraper.objects.create(currency=currency, frequency=60)
+
+        data = {
+            'id': currency.pk,
+            'frequency': 20,
+        }
+
+        Currency.update_frequency(data)
+
+        currency.refresh_from_db()
+        self.assertEqual(currency.frequency, data['frequency'])
+
+    def test_update_frequency_invalid_data(self):
+        self.assertEqual(
+            Currency.objects.count(),
+            0
+        )
+
+        data = {
+            'id': 1,
+            'invalid-key': 20,
+        }
+
+        with self.assertRaises(ValidationError):
+            Currency.update_frequency(data)
+
+    def test_update_frequency_invalid_id(self):
+        self.assertEqual(
+            Currency.objects.count(),
+            0
+        )
+
+        data = {
+            'id': 1,
+            'frequency': 20,
+        }
+
+        with self.assertRaises(Currency.DoesNotExist):
+            Currency.update_frequency(data)

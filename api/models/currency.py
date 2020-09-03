@@ -1,10 +1,11 @@
 # django
 from django.db import models
 from django.utils.translation import ugettext_lazy as _
-from django.core.exceptions import ValidationError
 
 # base
 from base.models import BaseModel
+from base.utils import compare_keys
+from base.utils import valid_if_is_float
 
 # managers
 from api.managers import CurrencyQueryset
@@ -51,13 +52,12 @@ class Currency(BaseModel):
 
     @classmethod
     def create_currency_from_coinmarketcap(cls, data):
-        valid_keys = sorted((
+        valid_keys = (
             'currency',
             'frequency',
-        ))
-
-        if not sorted(list(data.keys())) == valid_keys:
-            raise ValidationError('invalid keys')
+        )
+        compare_keys(data, valid_keys)
+        valid_if_is_float(data['frequency'])
 
         # return currency if exists
         if cls.objects.filter(name=data['currency']).exists():
@@ -72,6 +72,24 @@ class Currency(BaseModel):
             raise e
 
         return currency.get_currency_retrieve_serializer()
+
+    @classmethod
+    def update_frequency(cls, data):
+        valid_keys = (
+            'id',
+            'frequency',
+        )
+        compare_keys(data, valid_keys)
+        valid_if_is_float(data['frequency'])
+
+        try:
+            currency = cls.objects.get(pk=data['id'])
+        except cls.DoesNotExist:
+            raise cls.DoesNotExist('Currency doesn\'t exists.')
+
+        currency.scrapper.update_frequency(data['frequency'])
+
+        return {'msg': f'Frequency of "{currency.name}" updated to {currency.frequency}'}
 
     def get_currency_retrieve_serializer(self) -> dict:
         return {

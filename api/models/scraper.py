@@ -20,3 +20,7 @@ class Scraper(BaseModel):
     class Meta:
         verbose_name = _('Scraper')
         verbose_name_plural = _('Scrapers')
+
+    def update_frequency(self, new_frequency):
+        self.frequency = new_frequency
+        self.save()
