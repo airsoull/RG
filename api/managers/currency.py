@@ -10,15 +10,31 @@ from requests.exceptions import HTTPError
 from api import services
 
 # utils
-from base.utils import str_from_coinmarket_to_float
+from api.utils import str_from_coinmarket_to_float
 
 
 class CurrencyQueryset(models.QuerySet):
 
     def related_objects(self):
+        Price = apps.get_model('api', 'Price')
+
+        prices = Price.objects.filter(
+            value=models.Subquery(
+                Price.objects.filter(
+                    currency=models.OuterRef('currency')
+                ).values('value')
+            )
+        )
+
         return (
             self.select_related('scrapper')
-            .prefetch_related('prices')
+            .prefetch_related(
+                models.Prefetch(
+                    'prices',
+                    queryset=prices,
+                    to_attr='price_value'
+                )
+            )
         )
 
 

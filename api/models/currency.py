@@ -4,10 +4,12 @@ from django.utils.translation import ugettext_lazy as _
 
 # base
 from base.models import BaseModel
-from base.utils import compare_keys
-from base.utils import valid_if_is_float
-from base.utils import get_obj_by_pk
-from base.utils import default_json_message
+
+# utils
+from api.utils import compare_keys
+from api.utils import valid_if_is_float
+from api.utils import get_obj_by_pk
+from api.utils import default_json_message
 
 # managers
 from api.managers import CurrencyQueryset
@@ -37,6 +39,8 @@ class Currency(BaseModel):
 
     @property
     def value(self) -> float:
+        if hasattr(self, 'price_value'):
+            return self.price_value[0].value
         return self.prices.last().value
 
     @property

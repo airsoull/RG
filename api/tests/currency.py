@@ -12,6 +12,15 @@ from api.models import Scraper
 
 class CurrencyTestCase(TestCase):
 
+    def test_count_query_on_get_currencies_serializer(self):
+        for i in range(1, 10):
+            currency = Currency.objects.create(name=f'currency{i}')
+            Scraper.objects.create(currency=currency, frequency=i)
+            currency.prices.create(value=i)
+
+        with self.assertNumQueries(11):
+            Currency.get_currencies_serializer()
+
     def test_create_currency_from_coinmarketcap(self):
         self.assertEqual(
             Currency.objects.count(),

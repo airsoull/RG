@@ -6,6 +6,7 @@ from django.urls import reverse
 # models
 from api.models import Currency
 from api.models import Scraper
+from api.models import Price
 
 
 class ScraperAPITestCase(TestCase):
@@ -15,11 +16,48 @@ class ScraperAPITestCase(TestCase):
         self.currency_name = 'Bitcoin'
 
     def test_get(self):
+        currency = Currency.objects.create(name=self.currency_name)
+        Scraper.objects.create(currency=currency, frequency=60)
+        Price.objects.create(currency=currency, value=2000)
+
+        currency2 = Currency.objects.create(name='foo-bar')
+        Scraper.objects.create(currency=currency2, frequency=60)
+        Price.objects.create(currency=currency2, value=2000)
+
         response = self.client.get(self.url)
         self.assertEqual(response.status_code, 200)
         self.assertEqual(
             list(response.json().keys()),
             ['scrapers'],
+        )
+        self.assertEqual(
+            len(response.json()['scrapers']),
+            Currency.objects.count(),
+        )
+
+        expected_data = [
+            {
+                'id': currency.id,
+                'created_at': str(currency.created_at),
+                'currency': currency.name,
+                'frequency': currency.frequency,
+                'value': currency.value,
+                'value_updated_at': currency.value_updated_at,
+            },
+            {
+                'id': currency2.id,
+                'created_at': str(currency2.created_at),
+                'currency': currency2.name,
+                'frequency': currency2.frequency,
+                'value': currency2.value,
+                'value_updated_at': currency2.value_updated_at,
+
+            }
+        ]
+
+        self.assertEqual(
+            [sorted(d) for d in response.json()['scrapers']],
+            [sorted(d) for d in expected_data],
         )
 
     def test_post(self):
