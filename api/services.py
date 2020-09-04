@@ -15,12 +15,14 @@ def get_coinmarketcap_data(name: str) -> list:
 
     for i in range(1, 1000):
         content = get_coinmarketcap_content(i)
+
+        # search currency name on coinmarketcap
         if not re.search(name, content):
             continue
 
         parser.feed(content)
         for data in parser.data:
-            if name and name == data[1]:
+            if name == data[1]:
                 return data
 
 
